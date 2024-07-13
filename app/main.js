@@ -17,7 +17,7 @@ const server = net.createServer((socket) => {
 
     if (echoResponse === "echo") {
       socket.write(
-        `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${echoStrResponse.length}\r\n\r\n${echoResponse}`
+        `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${echoStrResponse.length}\r\n\r\n${echoStrResponse}`
       );
     } else if (requestTarget === "/") {
       socket.write(okHTTPResponse);
