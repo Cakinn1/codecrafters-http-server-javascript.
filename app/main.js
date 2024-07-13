@@ -13,7 +13,7 @@ const server = net.createServer((socket) => {
     } else if (url.startsWith("/echo/")) {
       const str = url.split("/echo/")[1];
       socket.write(
-        `HTTP/1.1 200 ok\r\nContent-Type: text/plain\r\nContent-Length: ${str.length}\r\n\r\n${str}`
+        `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${str.length}\r\n\r\n${str}`
       );
     } else if (url.startsWith("/user-agent")) {
       const header = requestString.split("\r\n")
