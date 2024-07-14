@@ -12,7 +12,7 @@ const server = net.createServer((socket) => {
     const header = requestString.split("\r\n");
     const method = requestString.split(" ")[0];
 
-    console.log(`url: ${url}, method: ${method}`);
+    console.log(requestString.split("\r\n"));
 
     if (url === "/") {
       socket.write("HTTP/1.1 200 OK\r\n\r\n");
@@ -34,15 +34,18 @@ const server = net.createServer((socket) => {
       const filePath = process.argv[3] || "/tmp/";
 
       if (method === "POST") {
-        const reqBody = requestString.split("\r\n")[5];
+        const emptyStrBeforeReqBody = header.findIndex((ele) => ele === "");
 
-        fs.appendFile(filePath + fileName, reqBody, (err) => {
-          if (err) {
-            return console.log("error", err);
+        fs.appendFile(
+          filePath + fileName,
+          header[emptyStrBeforeReqBody + 1],
+          (err) => {
+            if (err) {
+              return console.log("error", err);
+            }
+            socket.write("HTTP/1.1 201 Created\r\n\r\n");
           }
-
-          socket.write('HTTP/1.1 201 Created\r\n\r\n')
-        });
+        );
 
         // todo
       }
