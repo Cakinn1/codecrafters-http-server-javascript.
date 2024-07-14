@@ -35,7 +35,7 @@ const server = net.createServer((socket) => {
 
       if (method === "POST") {
         const reqBody = requestString.split("\r\n")[7];
-        console.log('reqbody:', reqBody)
+        console.log('reqbody:', requestString)
 
         fs.appendFile(filePath + fileName, reqBody, (err) => {
           if (err) {
