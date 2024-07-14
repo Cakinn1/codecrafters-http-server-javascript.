@@ -12,8 +12,6 @@ const server = net.createServer((socket) => {
     const header = requestString.split("\r\n");
     const method = requestString.split(" ")[0];
 
-    console.log(requestString.split("\r\n"));
-
     if (url === "/") {
       socket.write("HTTP/1.1 200 OK\r\n\r\n");
     } else if (url.startsWith("/echo/")) {
@@ -34,23 +32,9 @@ const server = net.createServer((socket) => {
       const filePath = process.argv[3] || "/tmp/";
 
       if (method === "POST") {
-        const emptyStrBeforeReqBody = header.findIndex((ele) => ele === "");
-
-        fs.appendFile(
-          filePath + fileName,
-          header[emptyStrBeforeReqBody + 1],
-          (err) => {
-            if (err) {
-              return console.log("error", err);
-            }
-            socket.write("HTTP/1.1 201 Created\r\n\r\n");
-          }
-        );
-
-        // todo
-      }
-
-      if (method === "GET") {
+        fs.writeFileSync(filePath + fileName, header[header.length - 1]);
+        socket.write("HTTP/1.1 201 Created\r\n\r\n");
+      } else if (method === "GET") {
         if (fs.existsSync(filePath + fileName)) {
           const content = fs.readFileSync(filePath + fileName).toString();
           socket.write(
