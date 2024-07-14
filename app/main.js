@@ -1,10 +1,8 @@
 const net = require("net");
 const fs = require("fs");
-const { Socket } = require("dgram");
 
 // You can use print statements as follows for debugging, they'll be visible when running tests.
 console.log("Logs from your program will appear here!");
-console.log(process.argv);
 
 const server = net.createServer((socket) => {
   socket.on("data", (data) => {
@@ -12,6 +10,9 @@ const server = net.createServer((socket) => {
 
     const url = requestString.split(" ")[1];
     const header = requestString.split("\r\n");
+    const method = requestString.split(" ")[0];
+
+    console.log(`url: ${url}, method: ${method}`);
 
     if (url === "/") {
       socket.write("HTTP/1.1 200 OK\r\n\r\n");
@@ -30,16 +31,31 @@ const server = net.createServer((socket) => {
       );
     } else if (url.startsWith("/files/")) {
       const fileName = url.split("/files/")[1];
-      const filePath = process.argv[3];
+      const filePath = process.argv[3] || "/tmp/";
 
-      if (fs.existsSync(filePath + fileName)) {
-        const content = fs.readFileSync(filePath + fileName).toString();
+      if (method === "POST") {
+        const reqBody = requestString.split("\r\n")[7];
 
-        socket.write(
-          `HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: ${content.length}\r\n\r\n${content}`
-        );
-      } else {
-        socket.write("HTTP/1.1 404 Not Found\r\n\r\n")
+        fs.appendFile(filePath + fileName, reqBody, (err) => {
+          if (err) {
+            return console.log("error", err);
+          }
+
+          socket.write('HTTP/1.1 201 Created\r\n\r\n')
+        });
+
+        // todo
+      }
+
+      if (method === "GET") {
+        if (fs.existsSync(filePath + fileName)) {
+          const content = fs.readFileSync(filePath + fileName).toString();
+          socket.write(
+            `HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: ${content.length}\r\n\r\n${content}`
+          );
+        } else {
+          socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
+        }
       }
     } else {
       socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
