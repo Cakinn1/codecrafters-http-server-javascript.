@@ -4,6 +4,7 @@ const { Socket } = require("dgram");
 
 // You can use print statements as follows for debugging, they'll be visible when running tests.
 console.log("Logs from your program will appear here!");
+console.log(process.argv);
 
 const server = net.createServer((socket) => {
   socket.on("data", (data) => {
@@ -29,18 +30,17 @@ const server = net.createServer((socket) => {
       );
     } else if (url.startsWith("/files/")) {
       const fileName = url.split("/files/")[1];
+      const filePath = process.argv[3];
 
-      if (!fs.existsSync(fileName)) {
-        socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
-        return;
-      }
-
-      fs.readFile("files/" + fileName, (err, data) => {
+      if (fs.existsSync(filePath + fileName)) {
+        const content = fs.readFileSync(filePath + fileName).toString();
 
         socket.write(
-          `HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: ${data.toString().length}\r\n\r\n${data.toString()}`
+          `HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: ${content.length}\r\n\r\n${content}`
         );
-      });
+      } else {
+        socket.write("HTTP/1.1 404 Not Found\r\n\r\n")
+      }
     } else {
       socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
     }
