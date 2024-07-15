@@ -81,14 +81,14 @@ const handleEchoRequest = (socket, url, header) => {
   );
 
   if (acceptEncoding) {
-    const encodingValue = acceptEncoding.split(" ")[1];
+    const encodingValue = acceptEncoding.split(" ")[1]
 
-    if (encodingValue === "gzip") {
+    if (encodingValue.toLowerCase() === "gzip") {
       socket.write(
         combineResponses(
           "HTTP/1.1 200 OK",
           "Content-Type: text/plain",
-          "Content-Encoding: gzip"
+          "Content-Encoding: gzip",
         )
       );
     } else if (encodingValue === "invalid-encoding") {
