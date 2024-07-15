@@ -29,7 +29,7 @@ const server = net.createServer((socket) => {
 });
 
 const handleRootRequest = (socket) => {
-  socket.write(combineResponses("HTTP/1.1 200 OK"));
+  socket.write('HTTP/1.1 200 OK\r\n\r\n');
 };
 
 const handleUserAgentRequest = (socket, header) => {
@@ -60,6 +60,8 @@ const handleFilesRequest = (socket, url, method, header) => {
       return;
     }
     const content = fs.readFileSync(exactFilePath).toString();
+
+    // w???????
 
     socket.write(
       combineResponses(
