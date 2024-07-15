@@ -95,13 +95,7 @@ const handleEchoRequest = (socket, url, header) => {
         } else {
           const hexdump = compressedBuffer.toString("hex");
           socket.write(
-            combineResponses(
-              "HTTP/1.1 200 OK",
-              "Content-Type: text/plain",
-              "Content-Encoding: gzip",
-              `Content-Length: ${hexdump.length}`, 
-              hexdump
-            )
+            `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\nContent-Length: ${hexdump.length}\r\n\r\n${hexdump}`
           );
         }
       });
