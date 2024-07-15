@@ -92,7 +92,7 @@ const handleEchoRequest = (socket, url, header) => {
       const hexDump = encoded.toString('hex')
 
       socket.write(
-        `HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nContent-Type: text/plain\r\nContent-Length: ${encoded.length}\r\n\r\n${encoded}`
+        `HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nContent-Type: text/plain\r\nContent-Length: ${encoded.length}\r\n\r\n${hexDump}`
       );
     } else {
       socket.write(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n`);
