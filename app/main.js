@@ -79,16 +79,16 @@ const handleEchoRequest = (socket, url, header) => {
     ele.startsWith("Accept-Encoding: ")
   );
 
-  const isEncodingValid = acceptEncoding
+
+
+
+  if (acceptEncoding) {
+    // const encodingValue = acceptEncoding.split(" ")[1].trim();
+    const isEncodingValid = acceptEncoding
     .toLowerCase()
     .replaceAll(",", "")
     .split(" ")
     .includes("gzip");
-
-  console.log(isEncodingValid);
-
-  if (acceptEncoding) {
-    // const encodingValue = acceptEncoding.split(" ")[1].trim();
 
     if (isEncodingValid) {
       socket.write(
