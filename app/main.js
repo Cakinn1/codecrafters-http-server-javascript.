@@ -80,7 +80,7 @@ const handleEchoRequest = (socket, url, header) => {
     ele.startsWith("Accept-Encoding: ")
   );
 
-  if (acceptEncoding && acceptEncoding.toLowerCase().includes("gzip")) {
+  if (acceptEncoding) {
     const isEncodingValid = acceptEncoding
       .toLowerCase()
       .replaceAll(",", "")
@@ -88,18 +88,10 @@ const handleEchoRequest = (socket, url, header) => {
       .includes("gzip");
 
     if (isEncodingValid) {
-      zlib.gzip(body, (err, compressedBuffer) => {
-        if (err) {
-          console.log(err, "error occureed");
-          socket.end();
-        } else {
-          const hexdump = compressedBuffer.toString("hex");
-          socket.write(
-            `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\nContent-Length: ${hexdump.length}\r\n\r\n${hexdump}`
-          );
-          socket.end();
-        }
-      });
+      const encoded = zlib.gzipSync(body);
+      socket.write(
+        `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\nContent-Length: ${encoded.length}\r\n\r\n${encoded}`
+      );
     } else {
       socket.write(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n`);
     }
