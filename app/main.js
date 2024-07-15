@@ -89,12 +89,9 @@ const handleEchoRequest = (socket, url, header) => {
 
     if (isEncodingValid) {
       const encoded = zlib.gzipSync(body);
-      const hexdump = encoded.toString('hex')
-
-      console.log(encoded, encoded.length, hexdump)
 
       socket.write(
-        `HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nContent-Type: text/plain\r\nConten-Length: ${encoded.length}\r\n\r\n${hexdump}`
+        `HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nContent-Type: text/plain\r\nContent-Length: ${encoded.length}\r\n\r\n${encoded}`
       );
     } else {
       socket.write(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n`);
