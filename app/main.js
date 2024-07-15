@@ -1,5 +1,6 @@
 const net = require("net");
 const fs = require("fs");
+const zlib = require("zlib");
 
 const PORT = 4221;
 
@@ -78,22 +79,32 @@ const handleEchoRequest = (socket, url, header) => {
   const acceptEncoding = header.find((ele) =>
     ele.startsWith("Accept-Encoding: ")
   );
-
-
-
+  console.log(body);
 
   if (acceptEncoding) {
-    // const encodingValue = acceptEncoding.split(" ")[1].trim();
     const isEncodingValid = acceptEncoding
-    .toLowerCase()
-    .replaceAll(",", "")
-    .split(" ")
-    .includes("gzip");
+      .toLowerCase()
+      .replaceAll(",", "")
+      .split(" ")
+      .includes("gzip");
 
     if (isEncodingValid) {
-      socket.write(
-        `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\n\r\n`
-      );
+      zlib.gzip(body, (err, compressedBuffer) => {
+        if (err) {
+          console.log(err, "error occureed");
+        } else {
+          const hexdump = compressedBuffer.toString("hex");
+          socket.write(
+            combineResponses(
+              "HTTP/1.1 200 OK",
+              "Content-Type: text/plain",
+              "Content-Encoding: gzip",
+              `Content-Length: ${hexdump.length}`, 
+              hexdump
+            )
+          );
+        }
+      });
     } else {
       socket.write(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n`);
     }
