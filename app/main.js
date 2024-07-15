@@ -91,8 +91,9 @@ const handleEchoRequest = (socket, url, header) => {
       const encoded = zlib.gzipSync(body);
 
       socket.write(
-        `HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nContent-Type: text/plain\r\nContent-Length: ${encoded.length}\r\n\r\n${encoded}`
+        `HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nContent-Type: text/plain\r\nContent-Length: ${Buffer.byteLength(body)}\r\n\r\n`
       );
+      socket.write(body)
     } else {
       socket.write(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n`);
     }
