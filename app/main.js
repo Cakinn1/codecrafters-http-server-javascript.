@@ -102,12 +102,9 @@ const handleEchoRequest = (socket, url, header) => {
 };
 
 const combineResponses = (...args) => {
-  if (args.length === 1) {
-    return `${args.join("\r\n\r\n")}`;
-  }
   const headers = args.slice(0, -1).join("\r\n");
-  const body = args.slice(-1)[0] || "";
-  return `${headers}\r\n\r\n${body}`;
+  const body = args.slice(-1)[0];
+  return body ? `${headers}\r\n\r\n${body}` : `${headers}\r\n\r\n`;
 };
 
 server.listen(PORT, "localhost");
