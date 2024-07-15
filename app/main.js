@@ -88,13 +88,19 @@ const handleEchoRequest = (socket, url, header) => {
       .includes("gzip");
 
     if (isEncodingValid) {
-      const encoded = zlib.gzipSync(body);
-      const hexDump = encoded.toString('hex')
-
-      socket.write(
-        `HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nContent-Type: text/plain\r\nContent-Length: ${Buffer.byteLength(encoded)}\r\n\r\n${hexDump}`
-      );
-      socket.write(encoded)
+      zlib.gzip(body, (err, buffer) => {
+        if (err) {
+          console.log("error", err);
+        } else {
+          socket.write(
+            `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${Buffer.byteLength(
+              buffer
+            )}\r\nContent-Encoding: gzip\r\n\r\n`
+          );
+          socket.write(buffer);
+          socket.end();
+        }
+      });
     } else {
       socket.write(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n`);
     }
