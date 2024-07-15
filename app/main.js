@@ -94,7 +94,6 @@ const handleEchoRequest = (socket, url, header) => {
       socket.write(
         `HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nContent-Type: text/plain\r\nContent-Length: ${encoded.length}\r\n\r\n${encoded}`
       );
-      socket.write(body)
     } else {
       socket.write(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n`);
     }
