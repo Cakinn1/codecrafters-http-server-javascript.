@@ -88,19 +88,10 @@ const handleEchoRequest = (socket, url, header) => {
       .includes("gzip");
 
     if (isEncodingValid) {
-      zlib.gzip(body, (err, buffer) => {
-        if (err) {
-          console.log("error", err);
-        } else {
-          socket.write(
-            `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${Buffer.byteLength(
-              buffer
-            )}\r\nContent-Encoding: gzip\r\n\r\n`
-          );
-          socket.write(buffer);
-          socket.end();
-        }
-      });
+      const compressedBody = zlib.gzipSync(body);
+      const res = `HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nContent-Type: plain/text\r\nContent-Length: ${compressedBody.length}\r\n\r\n`;
+      socket.write(res)
+      socket.write(compressedBody)
     } else {
       socket.write(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n`);
     }
