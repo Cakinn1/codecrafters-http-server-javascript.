@@ -13,7 +13,6 @@ const server = net.createServer((socket) => {
     const header = requestString.split("\r\n");
     const method = requestString.split(" ")[0];
 
-
     if (url === "/") {
       handleRootRequest(socket);
     } else if (url.startsWith("/echo/")) {
@@ -85,16 +84,10 @@ const handleEchoRequest = (socket, url, header) => {
 
     if (encodingValue.toLowerCase() === "gzip") {
       socket.write(
-        combineResponses(
-          "HTTP/1.1 200 OK",
-          "Content-Type: text/plain",
-          `Content-Encoding: ${encodingValue}`,
-        )
+        `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: ${encodingValue}\r\n\r\n`
       );
     } else if (encodingValue === "invalid-encoding") {
-      socket.write(
-        combineResponses("HTTP/1.1 200 OK", "Content-Type: text/plain")
-      );
+      socket.write(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n`);
     }
   } else {
     socket.write(
