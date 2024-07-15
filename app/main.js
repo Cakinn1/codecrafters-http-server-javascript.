@@ -22,7 +22,7 @@ const server = net.createServer((socket) => {
     } else if (url.startsWith("/files/")) {
       handleFilesRequest(socket, url, method, header);
     } else {
-      socket.write(combineResponses("HTTP/1.1 404 Not Found"));
+      socket.write('HTTP/1.1 404 Not Found\r\n\r\n');
     }
     socket.end();
   });
@@ -61,7 +61,6 @@ const handleFilesRequest = (socket, url, method, header) => {
     }
     const content = fs.readFileSync(exactFilePath).toString();
 
-    // w???????
 
     socket.write(
       combineResponses(
