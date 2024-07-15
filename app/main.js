@@ -1,8 +1,9 @@
 const net = require("net");
 const fs = require("fs");
 
-// You can use print statements as follows for debugging, they'll be visible when running tests.
-console.log("Logs from your program will appear here!");
+const PORT = 4221;
+
+console.log("Server is listening to Port:", PORT);
 
 const server = net.createServer((socket) => {
   socket.on("data", (data) => {
@@ -12,43 +13,110 @@ const server = net.createServer((socket) => {
     const header = requestString.split("\r\n");
     const method = requestString.split(" ")[0];
 
-    if (url === "/") {
-      socket.write("HTTP/1.1 200 OK\r\n\r\n");
-    } else if (url.startsWith("/echo/")) {
-      const str = url.split("/echo/")[1];
-      socket.write(
-        `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${str.length}\r\n\r\n${str}`
-      );
-    } else if (url.startsWith("/user-agent")) {
-      const userAgentHeader = header.find((ele) =>
-        ele.startsWith("User-Agent: ")
-      );
-      const userAgentValue = userAgentHeader.split("User-Agent:")[1].trim();
-      socket.write(
-        `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${userAgentValue.length}\r\n\r\n${userAgentValue}`
-      );
-    } else if (url.startsWith("/files/")) {
-      const fileName = url.split("/files/")[1];
-      const filePath = process.argv[3] || "/tmp/";
+    console.log(url);
 
-      if (method === "POST") {
-        fs.writeFileSync(filePath + fileName, header[header.length - 1]);
-        socket.write("HTTP/1.1 201 Created\r\n\r\n");
-      } else if (method === "GET") {
-        if (fs.existsSync(filePath + fileName)) {
-          const content = fs.readFileSync(filePath + fileName).toString();
-          socket.write(
-            `HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: ${content.length}\r\n\r\n${content}`
-          );
-        } else {
-          socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
-        }
-      }
+    if (url === "/") {
+      handleRootRequest(socket);
+    } else if (url.startsWith("/echo/")) {
+      handleEchoRequest(socket, url, header);
+    } else if (url.startsWith("/user-agent")) {
+      handleUserAgentRequest(socket, header);
+    } else if (url.startsWith("/files/")) {
+      handleFilesRequest(socket, url, method, header);
     } else {
-      socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
+      socket.write(combineResponses("HTTP/1.1 404 Not Found"));
     }
     socket.end();
   });
 });
 
-server.listen(4221, "localhost");
+const handleRootRequest = (socket) => {
+  socket.write(combineResponses("HTTP/1.1 200 OK"));
+};
+
+const handleUserAgentRequest = (socket, header) => {
+  const userAgentHeader = header.find((ele) => ele.startsWith("User-Agent: "));
+  const userAgentValue = userAgentHeader.split("User-Agent:")[1].trim();
+  socket.write(
+    combineResponses(
+      "HTTP/1.1 200 OK",
+      "Content-Type: text/plain",
+      `Content-Length: ${userAgentValue.length}`,
+      userAgentValue
+    )
+  );
+};
+
+const handleFilesRequest = (socket, url, method, header) => {
+  const fileName = url.split("/files/")[1];
+  const filePath = process.argv[3];
+  const exactFilePath = filePath + fileName;
+
+  if (method === "POST") {
+    fs.writeFileSync(exactFilePath, header[header.length - 1]);
+    socket.write(combineResponses("HTTP/1.1 201 Created"));
+  } else if (method === "GET") {
+    if (!fs.existsSync(exactFilePath)) {
+      socket.write(combineResponses("HTTP/1.1 404 Not Found"));
+      socket.end();
+      return;
+    }
+    const content = fs.readFileSync(exactFilePath).toString();
+
+    socket.write(
+      combineResponses(
+        "HTTP/1.1 200 OK",
+        "Content-Type: application/octet-stream",
+        `Content-Length: ${content.length}`,
+        content
+      )
+    );
+  }
+};
+
+const handleEchoRequest = (socket, url, header) => {
+  const body = url.split("/echo/")[1];
+
+  const acceptEncoding = header.find((ele) =>
+    ele.startsWith("Accept-Encoding: ")
+  );
+
+  console.log(acceptEncoding);
+  if (acceptEncoding) {
+    const encodingValue = acceptEncoding.split(" ")[1];
+
+    if (encodingValue === "gzip") {
+      socket.write(
+        combineResponses(
+          "HTTP/1.1 200 OK",
+          "Content-Type: text/plain",
+          "Content-Encoding: gzip"
+        )
+      );
+    } else if (encodingValue === "invalid-encoding") {
+      socket.write(
+        combineResponses("HTTP/1.1 200 OK", "Content-Type: text/plain")
+      );
+    }
+  } else {
+    socket.write(
+      combineResponses(
+        "HTTP/1.1 200 OK",
+        "Content-Type: text/plain",
+        `Content-Length: ${body.length}`,
+        body
+      )
+    );
+  }
+};
+
+const combineResponses = (...args) => {
+  if (args.length === 1) {
+    return `${args.join("\r\n\r\n")}`;
+  }
+  const headers = args.slice(0, -1).join("\r\n");
+  const body = args.slice(-1)[0] || "";
+  return `${headers}\r\n\r\n${body}`;
+};
+
+server.listen(PORT, "localhost");
