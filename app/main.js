@@ -55,7 +55,7 @@ const handleFilesRequest = (socket, url, method, header) => {
     socket.write("HTTP/1.1 201 Created\r\n\r\n");
   } else if (method === "GET") {
     if (!fs.existsSync(exactFilePath)) {
-      socket.write("HTTP/1.1 404 Not Found");
+      socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
       socket.end();
       return;
     }
