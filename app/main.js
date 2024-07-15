@@ -52,10 +52,10 @@ const handleFilesRequest = (socket, url, method, header) => {
 
   if (method === "POST") {
     fs.writeFileSync(exactFilePath, header[header.length - 1]);
-    socket.write(combineResponses("HTTP/1.1 201 Created"));
+    socket.write("HTTP/1.1 201 Created");
   } else if (method === "GET") {
     if (!fs.existsSync(exactFilePath)) {
-      socket.write(combineResponses("HTTP/1.1 404 Not Found"));
+      socket.write("HTTP/1.1 404 Not Found");
       socket.end();
       return;
     }
@@ -102,9 +102,12 @@ const handleEchoRequest = (socket, url, header) => {
 };
 
 const combineResponses = (...args) => {
+  if (args.length === 1) {
+    return `${args.join("\r\n\r\n")}`;
+  }
   const headers = args.slice(0, -1).join("\r\n");
-  const body = args.slice(-1)[0];
-  return body ? `${headers}\r\n\r\n${body}` : `${headers}\r\n\r\n`;
+  const body = args.slice(-1)[0] || "";
+  return `${headers}\r\n\r\n${body}`;
 };
 
 server.listen(PORT, "localhost");
