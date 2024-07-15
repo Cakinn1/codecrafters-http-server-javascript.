@@ -81,7 +81,7 @@ const handleEchoRequest = (socket, url, header) => {
   );
 
   if (acceptEncoding) {
-    const encodingValue = acceptEncoding.split(" ")[1]
+    const encodingValue = acceptEncoding.split(" ")[1].trim();
 
     if (encodingValue.toLowerCase() === "gzip") {
       socket.write(
