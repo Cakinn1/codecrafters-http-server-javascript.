@@ -13,7 +13,6 @@ const server = net.createServer((socket) => {
     const header = requestString.split("\r\n");
     const method = requestString.split(" ")[0];
 
-    console.log(url);
 
     if (url === "/") {
       handleRootRequest(socket);
@@ -81,7 +80,6 @@ const handleEchoRequest = (socket, url, header) => {
     ele.startsWith("Accept-Encoding: ")
   );
 
-  console.log(acceptEncoding);
   if (acceptEncoding) {
     const encodingValue = acceptEncoding.split(" ")[1];
 
