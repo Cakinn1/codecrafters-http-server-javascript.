@@ -22,14 +22,14 @@ const server = net.createServer((socket) => {
     } else if (url.startsWith("/files/")) {
       handleFilesRequest(socket, url, method, header);
     } else {
-      socket.write('HTTP/1.1 404 Not Found\r\n\r\n');
+      socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
     }
     socket.end();
   });
 });
 
 const handleRootRequest = (socket) => {
-  socket.write('HTTP/1.1 200 OK\r\n\r\n');
+  socket.write("HTTP/1.1 200 OK\r\n\r\n");
 };
 
 const handleUserAgentRequest = (socket, header) => {
@@ -61,7 +61,6 @@ const handleFilesRequest = (socket, url, method, header) => {
     }
     const content = fs.readFileSync(exactFilePath).toString();
 
-
     socket.write(
       combineResponses(
         "HTTP/1.1 200 OK",
@@ -80,14 +79,22 @@ const handleEchoRequest = (socket, url, header) => {
     ele.startsWith("Accept-Encoding: ")
   );
 
-  if (acceptEncoding) {
-    const encodingValue = acceptEncoding.split(" ")[1].trim();
+  const isEncodingValid = acceptEncoding
+    .toLowerCase()
+    .replaceAll(",", "")
+    .split(" ")
+    .includes("gzip");
 
-    if (encodingValue.toLowerCase() === "gzip") {
+  console.log(isEncodingValid);
+
+  if (acceptEncoding) {
+    // const encodingValue = acceptEncoding.split(" ")[1].trim();
+
+    if (isEncodingValid) {
       socket.write(
-        `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: ${encodingValue}\r\n\r\n`
+        `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\n\r\n`
       );
-    } else if (encodingValue === "invalid-encoding") {
+    } else {
       socket.write(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n`);
     }
   } else {
@@ -103,9 +110,6 @@ const handleEchoRequest = (socket, url, header) => {
 };
 
 const combineResponses = (...args) => {
-  if (args.length === 1) {
-    return `${args.join("\r\n\r\n")}`;
-  }
   const headers = args.slice(0, -1).join("\r\n");
   const body = args.slice(-1)[0] || "";
   return `${headers}\r\n\r\n${body}`;
