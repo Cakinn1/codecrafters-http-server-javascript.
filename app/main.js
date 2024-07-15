@@ -79,7 +79,6 @@ const handleEchoRequest = (socket, url, header) => {
   const acceptEncoding = header.find((ele) =>
     ele.startsWith("Accept-Encoding: ")
   );
-  console.log(body);
 
   if (acceptEncoding) {
     const isEncodingValid = acceptEncoding
@@ -92,6 +91,7 @@ const handleEchoRequest = (socket, url, header) => {
       zlib.gzip(body, (err, compressedBuffer) => {
         if (err) {
           console.log(err, "error occureed");
+          socket.end();
         } else {
           const hexdump = compressedBuffer.toString("hex");
           socket.write(
