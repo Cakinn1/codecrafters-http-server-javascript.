@@ -97,6 +97,7 @@ const handleEchoRequest = (socket, url, header) => {
           socket.write(
             `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\nContent-Length: ${hexdump.length}\r\n\r\n${hexdump}`
           );
+          socket.end();
         }
       });
     } else {
