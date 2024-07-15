@@ -88,7 +88,7 @@ const handleEchoRequest = (socket, url, header) => {
         combineResponses(
           "HTTP/1.1 200 OK",
           "Content-Type: text/plain",
-          "Content-Encoding: gzip",
+          `Content-Encoding: ${encodingValue}`,
         )
       );
     } else if (encodingValue === "invalid-encoding") {
