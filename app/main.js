@@ -80,7 +80,7 @@ const handleEchoRequest = (socket, url, header) => {
     ele.startsWith("Accept-Encoding: ")
   );
 
-  if (acceptEncoding) {
+  if (acceptEncoding && acceptEncoding.toLowerCase().includes("gzip")) {
     const isEncodingValid = acceptEncoding
       .toLowerCase()
       .replaceAll(",", "")
